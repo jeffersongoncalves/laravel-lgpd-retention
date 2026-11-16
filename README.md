@@ -62,6 +62,10 @@ php artisan lgpd:retention-reapply     # after restoring a backup
 Schedule::command('lgpd:retention')->daily();
 ```
 
+### Erasure requested by the data subject (DSAR)
+
+A model may be anonymized outside this package, for example by [laravel-lgpd-dsar](https://github.com/jeffersongoncalves/laravel-lgpd-dsar)'s `erase()` or by calling `$model->anonymizePersonalData()` directly. Those columns get tombstones too, so `lgpd:retention-reapply` also erases them when a backup brings them back. The listener for laravel-lgpd's `PersonalDataAnonymized` event records them, and you don't need to configure anything. The DSAR erasure skips `Keep` columns, so they get no tombstone, and they are still nullified when their own retention ends.
+
 You can also call it from code: `LgpdRetention::apply(dryRun: false)` returns one row per model and column with the number of records it anonymized. `LgpdRetention::reapply()` returns how many columns it erased again.
 
 ## Testing
