@@ -117,13 +117,23 @@ class RetentionManager
 
             $record->save();
 
-            foreach ($fields as $field) {
-                Tombstone::query()->updateOrCreate(
-                    ['model_type' => $record->getMorphClass(), 'model_id' => (string) $record->getKey(), 'column' => $field->column],
-                    ['fingerprint' => $this->fingerprint($record->getAttribute($field->column))],
-                );
-            }
+            $this->tombstone($record, array_map(fn (PersonalData $field): string => $field->column, $fields));
         });
+    }
+
+    /**
+     * Record that these columns of the record are anonymized (current values are the anonymized ones).
+     *
+     * @param  list<string>  $columns
+     */
+    public function tombstone(Model $record, array $columns): void
+    {
+        foreach ($columns as $column) {
+            Tombstone::query()->updateOrCreate(
+                ['model_type' => $record->getMorphClass(), 'model_id' => (string) $record->getKey(), 'column' => $column],
+                ['fingerprint' => $this->fingerprint($record->getAttribute($column))],
+            );
+        }
     }
 
     /**

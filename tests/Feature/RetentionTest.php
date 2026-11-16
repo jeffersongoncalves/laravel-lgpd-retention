@@ -90,6 +90,26 @@ it('re-anonymizes data restored from a backup, once', function () {
         ->and(LgpdRetention::reapply())->toBe(0);
 });
 
+it('tombstones any anonymization (e.g. DSAR erasure) so a backup restore is erased again', function () {
+    $customer = customer();
+    $customer->anonymizePersonalData(); // what laravel-lgpd-dsar erase() does
+    $erased = $customer->fresh()->only('name', 'email', 'notes');
+
+    expect(Tombstone::pluck('column')->sort()->values()->all())->toBe(['email', 'name', 'notes']); // not tax_id (Keep)
+
+    DB::table('customers')->where('id', $customer->id)->update(['name' => 'Maria', 'email' => 'maria@example.com', 'notes' => 'vip']);
+
+    expect(LgpdRetention::reapply())->toBe(3)
+        ->and($customer->fresh()->only('name', 'email', 'notes'))->toBe($erased);
+
+    // The Keep column the erasure spared still expires with its retention; erased columns are not touched again.
+    $this->travel(61)->months();
+    LgpdRetention::apply();
+
+    expect($customer->fresh()->tax_id)->toBeNull()
+        ->and($customer->fresh()->email)->toBe($erased['email']);
+});
+
 it('rejects an invalid retention period', function () {
     config()->set('lgpd.models', [BrokenRetention::class]);
 
