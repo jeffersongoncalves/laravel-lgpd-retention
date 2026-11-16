@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.0 - 2026-11-16
+
+- Tombstones every anonymization, not only retention expiry: listens to laravel-lgpd 1.1 `PersonalDataAnonymized`, so `lgpd:retention-reapply` also erases data a backup restore brings back after a DSAR erasure.
+- `Keep` columns spared by the erasure still expire with their own retention.
+- Requires `jeffersongoncalves/laravel-lgpd` ^1.1.
+
 ## 1.0.0 - 2026-11-16
 
 First release: LGPD data retention.
