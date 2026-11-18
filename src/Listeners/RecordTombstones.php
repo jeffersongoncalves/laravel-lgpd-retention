@@ -2,18 +2,16 @@
 
 namespace JeffersonGoncalves\LgpdRetention\Listeners;
 
-use JeffersonGoncalves\Lgpd\Events\PersonalDataAnonymized;
 use JeffersonGoncalves\LgpdRetention\RetentionManager;
+use JeffersonGoncalves\Privacy\Retention\Listeners\RecordTombstones as BaseRecordTombstones;
 
 /**
- * Tombstones any anonymization (DSAR erasure, consent records...), so lgpd:retention-reapply covers it too.
+ * Tombstones any anonymization of the suite, so the retention-reapply command covers it too.
  */
-class RecordTombstones
+class RecordTombstones extends BaseRecordTombstones
 {
-    public function __construct(protected RetentionManager $retention) {}
-
-    public function handle(PersonalDataAnonymized $event): void
+    public function __construct(RetentionManager $retention)
     {
-        $this->retention->tombstone($event->model, $event->columns);
+        parent::__construct($retention);
     }
 }
