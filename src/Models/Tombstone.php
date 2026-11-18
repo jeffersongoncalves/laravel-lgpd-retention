@@ -2,20 +2,10 @@
 
 namespace JeffersonGoncalves\LgpdRetention\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use JeffersonGoncalves\Privacy\Retention\Tombstone as BaseTombstone;
 
-/**
- * @property string $model_type
- * @property string $model_id
- * @property string $column
- * @property string $fingerprint
- */
-class Tombstone extends Model
+class Tombstone extends BaseTombstone
 {
-    public const UPDATED_AT = null;
-
-    protected $guarded = [];
-
     public function getTable(): string
     {
         return config('lgpd-retention.table', 'lgpd_retention_tombstones');
